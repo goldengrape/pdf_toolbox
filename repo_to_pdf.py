@@ -10,6 +10,7 @@ import stat
 import subprocess
 import markdown
 from bs4 import BeautifulSoup
+from nbconvert import HTMLExporter  # 导入HTMLExporter
 
 def handle_remove_readonly(func, path, exc):
     excvalue = exc[1]
@@ -30,6 +31,11 @@ def convert_to_html(file_path):
         return f"<pre>{content}</pre>"
     elif ext == ".html":
         return content
+    elif ext == ".ipynb":  # 添加对.ipynb文件的处理
+        html_exporter = HTMLExporter()
+        html_exporter.template_name = "lab"
+        html_data, _ = html_exporter.from_filename(file_path)
+        return html_data
     else:
         return None
 
@@ -52,7 +58,7 @@ if convert_button and repo_url:
         for root, _, files in os.walk(temp_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                if file.endswith(".txt") or file.endswith(".md") or file.endswith(".py") or file.endswith(".html"):
+                if file.endswith(".txt") or file.endswith(".md") or file.endswith(".py") or file.endswith(".html")  or file.endswith(".ipynb"):
                     html_content = convert_to_html(file_path)
                     if html_content:
                         html_file = os.path.splitext(file_path)[0] + ".html"
@@ -76,7 +82,6 @@ if convert_button and repo_url:
                 "encoding":"UTF-8",
             }
 
-            st.write(f"Converting the following files: {html_files}")
             pdfkit.from_file(html_files, "output.pdf", options=pdf_options, configuration=config)
 
             st.write("PDF generated successfully.")
