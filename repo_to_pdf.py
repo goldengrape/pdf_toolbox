@@ -72,11 +72,13 @@ if convert_button and repo_url:
 
             pdf_options = {
                 "quiet": "",
-                "enable-local-file-access": None
+                "enable-local-file-access": None,
+                "encoding":"UTF-8",
             }
 
             st.write(f"Converting the following files: {html_files}")
             pdfkit.from_file(html_files, "output.pdf", options=pdf_options, configuration=config)
+
             st.write("PDF generated successfully.")
 
             with open("output.pdf", "rb") as pdf_file:
