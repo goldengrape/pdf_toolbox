@@ -5,6 +5,8 @@ import glob
 import base64
 import streamlit as st
 import time 
+import tempfile  # 添加这一行
+
 
 # 定义一个函数，用于合并多个pdf文件为一个pdf文件，并返回合并后的文件名和内容
 def merge_pdfs(pdf_dir, out_dir):
@@ -52,12 +54,12 @@ if len(uploaded_files) >= 2:
     merged_file_name, merged_file_content = merge_pdfs(temp_dir + "/", temp_dir + "/")
     
      # 使用streamlit的success组件显示成功信息，并显示合成后的PDF文件名。
-     st.success("成功合成了以下PDF文件：")
-     st.write([file.name for file in uploaded_files])
-     st.write(f"合成后的PDF文件名为：{merged_file_name}")
+    st.success("成功合成了以下PDF文件：")
+    st.write([file.name for file in uploaded_files])
+    st.write(f"合成后的PDF文件名为：{merged_file_name}")
      
-     # 调用display_pdf函数，传入合成后的PDF文件名和内容，将其显示在web app上。
-     display_pdf(merged_file_name, merged_file_content)
+    # 调用display_pdf函数，传入合成后的PDF文件名和内容，将其显示在web app上。
+    display_pdf(merged_file_name, merged_file_content)
      
 # 如果用户没有上传至少两个PDF文件，则显示提示信息。
 else:
