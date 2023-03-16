@@ -50,26 +50,26 @@ def convert_repo_to_pdf(repo_url):
 
     html_files = [os.path.join(root, file) for root, _, files in os.walk(temp_dir) for file in files if file.endswith((".txt", ".md", ".py", ".html", ".ipynb"))]
 
-    html_files = [os.path.splitext(file_path)[0] + ".html" for file_path in html_files if (html_content := convert_to_html(file_path))]
+    html_contents = [convert_to_html(file_path) for file_path in html_files]
 
-    for html_file, html_content in zip(html_files, [convert_to_html(file_path) for file_path in html_files]):
-        with open(html_file, "w", encoding="utf-8") as f:
-            f.write(html_content)
+    html_files = [os.path.splitext(file_path)[0] + ".html" for file_path, html_content in zip(html_files, html_contents) if html_content]
 
-    if all(os.path.isfile(html_file) for html_file in html_files):
-        pdf_options = {
-            "quiet": "",
-            "enable-local-file-access": None,
-            "encoding": "UTF-8",
-        }
+    for html_file, html_content in zip(html_files, html_contents):
+        if html_content:
+            with open(html_file, "w", encoding="utf-8") as f:
+                f.write(html_content)
 
-        pdfkit.from_file(html_files, "output.pdf", options=pdf_options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
+    pdf_options = {
+        "quiet": "",
+        "enable-local-file-access": None,
+        "encoding": "UTF-8",
+    }
 
-        st.write("PDF generated successfully.")
-        with open("output.pdf", "rb") as pdf_file:
-            st.download_button("Download PDF", pdf_file.read(), "output.pdf", "application/pdf")
-    else:
-        st.error("Error: Some HTML files could not be created.")
+    pdfkit.from_file(html_files, "output.pdf", options=pdf_options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
+
+    st.write("PDF generated successfully.")
+    with open("output.pdf", "rb") as pdf_file:
+        st.download_button("Download PDF", pdf_file.read(), "output.pdf", "application/pdf")
 
 
 st.title("Git Repo to PDF Converter")
