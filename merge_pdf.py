@@ -24,14 +24,6 @@ def merge_pdfs(pdf_dir, out_dir):
         merged_file_content = f.read()
     return merged_file_name, merged_file_content
 
-# 定义一个函数，用于将pdf文件内容转换为base64编码，并嵌入到html中显示在web app上
-def display_pdf(file_name, file_content):
-    # 将pdf文件内容转换为base64编码，并拼接成html格式的字符串
-    encoded_pdf = base64.b64encode(file_content).decode()
-    pdf_display = f'<embed src="data:application/pdf;base64,{encoded_pdf}" width="700" height="1000" type="application/pdf">'
-    # 使用streamlit的markdown组件显示html字符串，并设置unsafe_allow_html参数为True，允许渲染html标签
-    st.markdown(pdf_display, unsafe_allow_html=True)
-
 # 设置web app的标题和说明文字
 st.title("PDF合成器")
 st.write("这是一个简单的web app，可以将多个PDF文件合成为一个PDF文件。")
@@ -57,9 +49,8 @@ if len(uploaded_files) >= 2:
     st.success("成功合成了以下PDF文件：")
     st.write([file.name for file in uploaded_files])
     st.write(f"合成后的PDF文件名为：{merged_file_name}")
+    st.download_button("点击下载合成后的PDF文件", merged_file_content, merged_file_name, "application/pdf")
      
-    # 调用display_pdf函数，传入合成后的PDF文件名和内容，将其显示在web app上。
-    display_pdf(merged_file_name, merged_file_content)
      
 # 如果用户没有上传至少两个PDF文件，则显示提示信息。
 else:
