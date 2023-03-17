@@ -8,6 +8,10 @@ from urllib.parse import urljoin
 import pdfkit
 import streamlit as st
 
+def set_environment():
+    os.environ['XDG_RUNTIME_DIR'] = tempfile.gettempdir()
+
+
 def fetch_html(url):
     response = requests.get(url)
     return response.text
@@ -57,6 +61,8 @@ def get_wkhtmltopdf_path():
         return path.stdout.decode('utf-8').strip()
 
 def main():
+    set_environment()
+
     url_input, depth_input, download_button = display_app()
 
     if download_button:
