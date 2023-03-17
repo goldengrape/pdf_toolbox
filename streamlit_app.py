@@ -8,7 +8,7 @@ choice={
     "Convert Git Repo to PDF": repo_to_pdf,
     "Convert WebSite to PDF": webscraper_to_pdf,
     "Merge PDF": merge_pdf,
-    "Compress PDF": st.write("to do")
+    # "Compress PDF": None,
 }
 
 sidebar_selection = st.sidebar.radio("Choose tool", 
