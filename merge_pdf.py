@@ -37,11 +37,11 @@ def merge_pdfs(pdf_dir, out_dir):
 
 
 def main():
-    st.title("PDF合成器")
-    st.write("这是一个简单的web app，可以将多个PDF文件合成为一个PDF文件。")
+    st.title("PDF merge")
+    st.write("This is a simple web app that can merge multiple PDF files into one PDF file.")
 
     uploaded_files = st.file_uploader(
-        "请上传要合成的PDF文件（可多选）", type="pdf", accept_multiple_files=True
+        "Please upload the PDF files to be merged (multiple selection allowed)", type="pdf", accept_multiple_files=True
     )
 
     if len(uploaded_files) >= 2:
@@ -53,18 +53,18 @@ def main():
             temp_dir + "/", temp_dir + "/"
         )
 
-        st.success("成功合成了以下PDF文件：")
+        st.success("Successfully merged the following PDF files:")
         st.write([file.name for file in uploaded_files])
-        st.write(f"合成后的PDF文件名为：{merged_file_name}")
+        st.write(f"The merged PDF file name is: {merged_file_name}")
         st.download_button(
-            "点击下载合成后的PDF文件",
+            "Click to download the merged PDF file",
             merged_file_content,
             merged_file_name,
             "application/pdf",
         )
 
     else:
-        st.warning("请至少上传两个PDF文件。")
+        st.warning("Please upload at least two PDF files.")
 
 
 if __name__ == "__main__":
