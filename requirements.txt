@@ -1,0 +1,7 @@
+streamlit
+gitpython
+pdfkit
+markdown
+nbconvert
+pymupdf
+pillow
