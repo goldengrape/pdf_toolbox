@@ -7,7 +7,17 @@ import platform
 import subprocess
 import markdown
 from nbconvert import HTMLExporter
+import nbformat
+import shutil
+import time 
 
+def remove_unsupported_output(notebook):
+    """Remove unsupported output types from notebook cells."""
+    for cell in notebook.cells:
+        if cell.cell_type == "code":
+            cell.outputs = [output for output in cell.outputs if not (output.output_type == 'display_data' and "application/vnd.jupyter.widget-state+json" in output.data)]
+
+    return notebook
 
 def convert_to_html(file_path):
     ext = os.path.splitext(file_path)[1]
@@ -21,12 +31,16 @@ def convert_to_html(file_path):
     elif ext == ".html":
         return content
     elif ext == ".ipynb":
+        notebook = nbformat.reads(content, as_version=4)
+        notebook = remove_unsupported_output(notebook)
+        
         html_exporter = HTMLExporter()
         html_exporter.template_name = "lab"
-        html_data, _ = html_exporter.from_filename(file_path)
+        html_data, _ = html_exporter.from_notebook_node(notebook)
         return html_data
     else:
         return None
+
 
 
 def clone_repository(repo_url, temp_dir):
@@ -49,18 +63,29 @@ def create_html_files(temp_dir, html_files, html_contents):
                 f.write(html_content)
 
 
-def generate_pdf_from_html_files(html_files):
+def generate_pdf_from_html_files(html_files, pdf_file_name):
     pdf_options = {
         "quiet": "",
         "enable-local-file-access": None,
         "encoding": "UTF-8",
     }
 
-    pdfkit.from_file(html_files, "output.pdf", options=pdf_options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
+    pdfkit.from_file(html_files, pdf_file_name, options=pdf_options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
 
     st.write("PDF generated successfully.")
-    with open("output.pdf", "rb") as pdf_file:
-        st.download_button("Download PDF", pdf_file.read(), "output.pdf", "application/pdf")
+    with open(pdf_file_name, "rb") as pdf_file:
+        download_button=st.download_button("Download PDF", pdf_file.read(), pdf_file_name, "application/pdf")
+        return download_button
+
+
+
+def remove_temp_dir(temp_dir):
+    """Remove temporary directory and its contents."""
+    try:
+        shutil.rmtree(temp_dir)
+        st.write(f"Temporary directory {temp_dir} removed successfully.")
+    except Exception as e:
+        st.write(f"Error while removing temporary directory {temp_dir}: {e}")
 
 
 def convert_repo_to_pdf(repo_url):
@@ -77,7 +102,13 @@ def convert_repo_to_pdf(repo_url):
 
     create_html_files(temp_dir, html_files, html_contents)
 
-    generate_pdf_from_html_files(html_files)
+    # generate_pdf_from_html_files(html_files)
+    repo_name = os.path.basename(repo_url)
+    pdf_file_name = repo_name + ".pdf"
+    downloaded=generate_pdf_from_html_files(html_files, pdf_file_name)
+    if downloaded:
+        time.sleep(5)
+        remove_temp_dir(temp_dir)
 
 
 def main():
