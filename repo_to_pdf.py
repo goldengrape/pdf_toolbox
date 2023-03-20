@@ -10,6 +10,7 @@ from nbconvert import HTMLExporter
 import nbformat
 import shutil
 import time 
+from utils import get_wkhtmltopdf_path
 
 def remove_unsupported_output(notebook):
     """Remove unsupported output types from notebook cells."""
@@ -48,12 +49,6 @@ def clone_repository(repo_url, temp_dir):
     st.write("Repository cloned successfully.")
 
 
-def get_wkhtmltopdf_path():
-    if platform.system() == "Windows":
-        return r"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
-    else:
-        path = subprocess.run(['which', 'wkhtmltopdf'], stdout=subprocess.PIPE)
-        return path.stdout.decode('utf-8').strip()
 
 
 def create_html_files(temp_dir, html_files, html_contents):

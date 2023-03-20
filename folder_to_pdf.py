@@ -2,6 +2,7 @@ from typing import List
 import os
 import pdfkit
 import fitz
+from repo_to_pdf import convert_to_html, remove_unsupported_output
 from utils import get_wkhtmltopdf_path
 
 def get_file_paths(folder_path: str) -> List[str]:
@@ -12,39 +13,30 @@ def get_file_paths(folder_path: str) -> List[str]:
     return file_paths
 
 def convert_to_pdf(file_path: str) -> str:
-    pdf_path = os.path.splitext(file_path)[0] + ".pdf"
-
-    options = {
-        'quiet': '',
-        'page-size': 'Letter',
-        'encoding': 'utf-8',
-    }
-    
-    pdfkit.from_file(file_path, pdf_path, options=options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
+    file_type = os.path.splitext(file_path)[1]
+    html=convert_to_html(file_path)
+    pdf_path = file_path+".pdf"
+    options = {'quiet': '','page-size': 'Letter','encoding': 'utf-8',}
+    pdfkit.from_string(html, pdf_path, options=options, configuration=pdfkit.configuration(wkhtmltopdf=get_wkhtmltopdf_path()))
     return pdf_path
 
 def merge_pdfs(pdf_paths: List[str], output_path: str) -> None:
-    pdf_writer = fitz.open()
+    pdf_document = fitz.open()
     for pdf_path in pdf_paths:
-        pdf_reader = fitz.open(pdf_path)
-        for page_number in range(len(pdf_reader)):
-            page = pdf_reader.load_page(page_number)
-            pdf_writer.insert_pdf(pdf_reader, from_page=page_number, to_page=page_number)
-        pdf_reader.close()
-    pdf_writer.save(output_path)
-    pdf_writer.close()
+        pdf_document.insert_pdf(fitz.open(pdf_path))
+        os.remove(pdf_path)
+    pdf_document.save(output_path)
+    pdf_document.close()
 
 def main():
     folder_path = input("请输入文件夹路径：")
     file_paths = get_file_paths(folder_path)
     pdf_paths = []
     for file_path in file_paths:
-        if os.path.splitext(file_path)[1] in [".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".txt"]:
+        if os.path.splitext(file_path)[1] in [".ipynb", ".md", ".txt", ".py"]:
             pdf_path = convert_to_pdf(file_path)
             pdf_paths.append(pdf_path)
-    output_path = os.path.join(folder_path, "output.pdf")
-    merge_pdfs(pdf_paths, output_path)
-    print("转换完成！")
-
-if __name__ == "__main__":
+    merge_pdfs(pdf_paths, os.path.join(folder_path, "output.pdf"))
+    print("PDF文件已生成！")
+if __name__=="__main__":
     main()
